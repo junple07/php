@@ -94,8 +94,7 @@ function get_template($key, $component){
 function include_component($key, $component){
     // 检查模板文件是否存在
     $template = get_template($key, $component);
-echo $template;die;
-    if(!empty($template)) return false;
+    if(empty($template)) return false;
     
     // 如果调试真是的文件内容, 返回原文件
     if(!empty($_GET['component'])){
