@@ -1,0 +1,23 @@
+原因1: 基于现在很多页面都是比较庞大的, 所以应该按照页面的不同模块拆开, 便于阅读以及后期维护
+原因2: 页面的加载速度得不到保证， 缓存是一个非常重要的策略, 如果将数据缓存的nosql也未尝不可, 但这样会导致nosql的压力, 这里的做法就是将每一个的区块的html, 缓存到文件中去, 由于业务的复杂性, 每个模块可以设置不同的缓存时间
+
+从index.php入口, 为了演示方便, 分两个模块
+
+function/functions.php 函数文件, 必须引入进来
+
+config/cache.php 配置文件, 配置不同页面(类型)不同的组件
+
+cache 缓存文件的文件夹
+
+templates 真实页面模块的模板文件
+
+用法 <?php include_component('index', 'center'); ?>
+include_component 在function/functions.php 文件中
+
+在配置文件中找类型是index, 组件是center的配置信息 lifetime缓存时间, enabled是否缓存
+
+原理: 如果不缓存或者带了$_GET['component']的参数, 则直接返回原真实的模板文件
+如果缓存文件的修改日期加上该模块的缓存有效时间大于当前时间, 说明当前组件还在缓存期内, 否则需要重新设置缓存
+
+演示: index.php文件中, top模块设置的缓存, 在template/index_top.php 随便修改, 则在缓存有效时间内, 看不到任何的修改
+center未配置缓存, 修改template/index_center.php则可以看到修改

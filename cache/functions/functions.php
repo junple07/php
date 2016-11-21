@@ -108,7 +108,7 @@ function include_component($key, $component){
     }
 
     // 不使用缓存, 取出真实模板文件
-    if($cache_data['enabled'] != 'on'){
+    if(strtolower($cache_data['enabled']) != 'on'){
         return include_once($template);
     }
 
@@ -116,10 +116,10 @@ function include_component($key, $component){
     $cache_template = get_cache_template($key, $component);
     if(file_exists($cache_template) && (filemtime($cache_template) + $cache_data['lifetime']) > time()){
         // 当缓存文件的修改时间 + 配置缓存的时间 > 当前时间, 则使用缓存文件的内容
-        return $cache_template;
+        return include_once($cache_template);
     }else{
         // 使用缓存, 只是过期了而已, 或者缓存文件不存在, 需要重新设置缓存文件, 并返回真实的文件
         set_cache($key, $component);
-        return $template;
+        return include_once($template);
     }
 }

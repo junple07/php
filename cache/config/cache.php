@@ -3,12 +3,12 @@
 return array(
     'index' => array(
         'top' 		=> array(
-            'enabled' 	=> 'off',
-            'lifetime'	=> '1440'
+            'enabled' 	=> 'on',
+            'lifetime'	=> '60'
         ),
         'center'	=> array(
             'enabled' 	=> 'off',
-            'lifetime'	=> '1440'
+            'lifetime'	=> '60'
         )
     )
 );
