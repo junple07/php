@@ -1,8 +1,8 @@
 <?php
 
-define('CACHE_DIR', dirname(dirname(__FILE__)) . "/cache/");
-define('CACHE_CONF', dirname(dirname(__FILE__)) . "/config/cache.yml");
-define('TEMPLATES', dirname(dirname(__FILE__)) . "/templates/");
+define('CACHE_DIR', dirname(dirname(__FILE__)) . '/cache/');
+define('CACHE_CONF', dirname(dirname(__FILE__)) . '/config/cache.yml');
+define('TEMPLATES', dirname(dirname(__FILE__)) . '/templates/');
 
 /**
  * @param type $log 写入内容的文件
@@ -10,9 +10,34 @@ define('TEMPLATES', dirname(dirname(__FILE__)) . "/templates/");
  * @todo 将内容写入到指定文件去
  */
 function writer($log, $content){
-    $fp = fopen($log, "w+");
+    $fp = fopen($log, 'w+');
     fwrite($fp, $content);
     fclose($fp);
+}
+
+/*
+ * 取出配置文件里面的内容删除配置文件中的注释
+ */
+function get_conf(){
+    // 如果没有配置文件
+    if(!file_exists(CACHE_CONF)) return false;
+    
+    $tmp_content    = file_get_contents(CACHE_CONF);
+    if(empty($tmp_content)) return false;
+    $tmp_arr        = explode("\r\n", $tmp_content);
+    $contents       = array();
+    foreach($tmp_arr as $line){
+        // 如果第一个字符, 是#开头的, 则删除这一行
+        if(strpos('#', trim($line)) == 0){
+            continue;
+        }
+        $contents[] = $line;
+    }
+    
+    $arr = explode('_', implode("\r\n", $contents));
+    if(empty($arr[0])) array_shift($arr);
+    
+    return $arr;
 }
 
 /**
@@ -21,16 +46,14 @@ function writer($log, $content){
  * @return 返回通过设置的cache文件
  */
 function get_cache($component){
-    if(!file_exists(CACHE_CONF)) return false;
-    
-    $conf = file_get_contents(CACHE_CONF);
-    $tmp_arr = explode("_", $conf);
-    if(empty($tmp_arr[0])) array_shift($tmp_arr);
+    // 配置文件的内容, 数组格式
+    $contents = get_conf();
+    print_r($contents);die;
 
     $component_data = array();
 
-    if(is_array($tmp_arr)){
-        foreach($tmp_arr as $key => $value){
+    if(is_array($contents)){
+        foreach($contents as $value){
             $index_arr = explode("\r\n", trim($value));
             $first_arr = array_shift($index_arr);
             $component_index = rtrim($first_arr, ":");
