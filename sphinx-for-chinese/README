@@ -37,4 +37,41 @@ eg: 我的偶像是adele, 首先切分成'我' '的' '偶像' '是' 'adele', 然
 是 => 400, 481
 adele => 459, 1
 
-一个词可能对应多个id, 按照不同的排序方式, 将id组成一个链表, 最终将倒排索引放入内存
+一个词可能对应多个id, 按照不同的排序方式(相似度 和 词频两个因子构成), 将id组成一个链表, 最终将倒排索引放入内存
+
+多索引搜索
+
+分类 place_category
+tag place_tag
+poi place_poi
+
+分类下, 有多个tag, poi可以属于所个tag, 分类, tag, poi是这么一层关系. 现在要搜索一个keyword, 我想既能搜到分类, 也能搜到tag, 同时也支持我搜到poi
+
+此时, 我们就需要建立三个索引, 三张数据表, 三个索引, 用如下的方式来做
+
+$keyword = '锦囊杂志';
+
+$s = new SphinxClient;
+$s->setServer('127.0.0.1', 9312);
+
+$s->setMatchMode(SPH_MATCH_ANY);
+$s->SetSortMode('SPH_SORT_ATTR_DESC');
+
+// 设置filter
+$s->SetFilter('status', 1);
+$s->AddQuery($keyword, 'index_qyer_place_poi');
+
+// 重置filter, 然后针对另外的索引设置filter
+$s->ResetFilters();
+$s->SetFilter('state', 1);
+$s->AddQuery($keyword, 'index_qyer_place_tag');
+
+// 最后查询
+$result = $s->RunQueries();
+$s->close();
+
+此时, 由于sphinx只返回id, 所以我们不知道, 这个id, 到底数据那个索引, 也就不知道这个id到底属于哪个数据表. 这时候需要从sphinx.conf做手脚
+
+在index_qyer_place_poi这个索引的source中, 设置sql_attr_uint = spx_type, select id, xxx, 1 as spx_type from place_poi
+在index_qyer_place_tag这个索引的source中, 设置sql_attr_uint = spx_type, select id, xxx, 2 as spx_type from place_tag
+这样在搜索结果中, attrs这个数据里面, 发现如果spx_type = 1就是place_poi的id, spx_type = 2就是place_tag的id
