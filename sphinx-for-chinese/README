@@ -1,0 +1,40 @@
+coreseek已经挂了, 没办法, 只能看看sphinx-for-chinese
+
+下面先来介绍一下sphinx-for-chinese的安装方法
+url: http://code.google.com/p/sphinx-for-chinese/downloads/list
+
+下载最新版本的sphinx-for-chinese sphinx-for-chinese-2.1.0-dev-r3361.tar.bz2 
+以及需要的字典 xdict_1.1.tar.gz
+
+安装sphinx-for-chinese, 解压, 编译
+phper注意, 需要到sphinx-for-chinesename/api/libsphinxclient, ./configure --prefix=/usr/local/sphinx, 需要安装一下sphinx客户端
+
+集成xdict, 解压, 然后安装字典. 
+/usr/local/sphinx/bin/mkdict xdict.txt xdict
+然后将字典(xdict)拷贝到/usr/local/sphinx/etc/里面, 再修改sphinx.conf 
+加上chinese_dictionary = /usr/local/sphinx/etc/xdict, 修改charset_type = utf-8
+
+sphinx.conf修改mysql的配置源, 这里就不谈了.
+
+索引数据
+/usr/local/sphinx/bin/indexer -c /usr/local/sphinx/etc/sphinx.conf --all
+
+启动(关闭)searchd服务, 监听sphinx的请求
+/usr/local/sphinx/bin/searchd -c /usr/local/sphinx/etc/sphinx.conf (--stop)
+
+这里再谈谈sphinx的索引原理, 我理解的比较浅, 其实就是倒排索引
+
+什么是倒排索引, 我谈谈我的理解
+
+以往我们关系型数据库, 都是 id => 行纪录
+
+倒排索引就是将行纪录, 先按照分词切开, 然后对应文档的id
+
+eg: 我的偶像是adele, 首先切分成'我' '的' '偶像' '是' 'adele', 然后用这几个不同的词, 去查看全部的数据库记录, 对应到id来, 最终的结果可能是
+我 => 1, 2
+的 => 4, 122
+偶像 => 100, 12
+是 => 400, 481
+adele => 459, 1
+
+一个词可能对应多个id, 按照不同的排序方式, 将id组成一个链表, 最终将倒排索引放入内存
