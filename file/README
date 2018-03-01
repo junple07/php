@@ -1,9 +1,9 @@
 这里记录一下, 怎么处理用php处理文件
 
-1: 插入指定行, 用fwrite写进去会覆盖掉下面的行的字符, 原因不清楚, 只能用linux的sed了:)
+1: 插入指定行, 用fwrite写进去会覆盖掉下面的行的字符, 原因不清楚, 只能用linux的sed了:) function insert_specific_line
 
-2: 查找指定行
+2: 查找指定行 function select_specific_line
 
-3: 查找指定行的指定字符
+3: 查找指定行的指定字符 function select_specific_word
 
-4: 大文件排序
+4: 大文件排序 function sort_file
