@@ -75,12 +75,12 @@ function sort_file($file){
     if(file_exists($file_tmp)) unlink($file_tmp);
     exec(sprintf('touch %s', $file_tmp));
     
-    $fp     = fopen($file, 'r');
-    $fp_tmp = fopen($file_tmp, 'r');
+    $fp = fopen($file, 'r');
     
     $x = 0;
     while(!feof($fp)){
         $line = (int)fgets($fp);
+        if(empty($line)) continue;
         
         // 第一行为空, 首次, 里面啥都没有, 直接写进去, 文件行不存在sed, 写不进去啊, 只能用php写
         if($x == 0){
@@ -96,19 +96,23 @@ function sort_file($file){
             continue;
         }
         
-        $i = 1;
+        $i      = 1;
+        $fp_tmp = fopen($file_tmp, 'r');
         while(true){
             $line_tmp = (int)fgets($fp_tmp);
             
             // 当原文件小于新文件的当前行, 插入到当前行的前一行
             if($line <= $line_tmp){
-                insert_specific_line($file_tmp, $i, $line);
+                $system = sprintf("sed -i '%ui\%u' %s", $i, $line, $file_tmp);
+                exec($system);
+                break;
             }
             
             $i++;
             
             if(feof($fp_tmp)) break;
         }
+        fclose($fp_tmp);
         
         $x++;
     }
