@@ -28,17 +28,17 @@ class Timelimited{
     public function consume_list($user_id){
         if(empty($user_id)) return false;
         
-        // redis队列不能保证一致性, 会有丢失的可能, 所以使用rpoplpush, pop的同时往另外的队列里面push一条, 原子性
-        $shop_goods_id = $this->_redis->rpoplpush($this->_shop_goods_list_key, $this->_shop_goods_list_key_bak);
-        if(empty($shop_goods_id)){
-            echo '已经抢光了' . PHP_EOL;
-            return false;
-        }
-        
         // 查看当前用户是不是已经抢到过了, 抢过了不准抢
         $user_shop_goods = $this->_redis->hget($this->_hash_key, $user_id);
         if(!empty($user_shop_goods)){
             echo '你已经抢到了' . PHP_EOL;
+            return false;
+        }
+        
+        // redis队列不能保证一致性, 会有丢失的可能, 所以使用rpoplpush, pop的同时往另外的队列里面push一条, 原子性
+        $shop_goods_id = $this->_redis->rpoplpush($this->_shop_goods_list_key, $this->_shop_goods_list_key_bak);
+        if(empty($shop_goods_id)){
+            echo '已经抢光了' . PHP_EOL;
             return false;
         }
         
