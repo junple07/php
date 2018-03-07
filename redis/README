@@ -1,0 +1,13 @@
+timelimited.class.php: 这里实现一个秒杀的系统. 往redis队列里, 导入N个商品, 然后由M个人去抢这两个商品, 看谁能抢到
+
+1. 往消息队列里, 导入两个商品
+
+2. 并发100个请求来抢商品, 每个请求的处理方式如以下说明:
+    1) pop一条数据出来, 考虑到redis队列pop出去, 逻辑未成功处理, 数据就丢失了. 故要使用rpoplpush.
+    2) 想一想, 一个用户职能抢一个商品, 不能一个用户抢多个, 怎么实现一个用户通过高并发来抢商品.
+    3) 所有抢成功的, 都记录到redis hash里面去. field = 用户的id, value = 商品的id, 方便查看
+
+3. 那就看代码吧. 哈哈 :)
+
+执行结果, 最终用http_load压力测试一下即可, 请求总共1000次, 并发100, 多了我电脑扛不住啊, 负载迅速攀升
+echo 'http://www.coderookie.com/redis/timelimited.class.php' > /tmp/url.txt && http_load -p 100 -f 1000 /tmp/url.txt
